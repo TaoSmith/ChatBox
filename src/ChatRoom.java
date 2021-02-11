@@ -1,4 +1,4 @@
-
+//Run this .java to correctly run the Chatroom!
 public class ChatRoom {
 
 	static Window_1 win1;
