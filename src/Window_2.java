@@ -170,7 +170,7 @@ public class Window_2 extends JFrame
 		//BufferedWriter buffer = new BufferedWriter(fileWriter);
 		//PrintWriter printWriter = new PrintWriter(buffer);
 		display2.append(Window_1.username1 + " : " + encryptedText + "\n");
-		display2_2.append(Window_2.username2 +  " : " + s + "\n");
+		display2_2.append(Window_1.username1 +  " : " + s + "\n");
 		//printWriter.println(Window_1.username1+ " : " + s);
 		//printWriter.close();
 	}
