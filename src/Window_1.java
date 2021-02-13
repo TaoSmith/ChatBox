@@ -67,12 +67,8 @@ public class Window_1 extends JFrame
 		contentPane.add(display1_1);
 		
 		text1 = new JTextArea();
-		text1.setBounds(21, 403, 239, 45);
+		text1.setBounds(21, 403, 495, 45);
 		contentPane.add(text1);
-		
-		text1_1 = new JTextArea();
-		text1_1.setBounds(370, 403, 239, 45);
-		contentPane.add(text1_1);
 		
 		send1 = new JButton("SEND");
 		send1.addActionListener(new ActionListener() {
@@ -93,14 +89,14 @@ public class Window_1 extends JFrame
 				text1.setText("");
 			}
 		});
-		send1.setBounds(270, 403, 89, 45);
+		send1.setBounds(523, 403, 89, 45);
 		contentPane.add(send1);
 	
 		////////////////Decrypt button///////////////////////
 		send1_1	= new JButton("DECRYPT");
 		send1_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0_) {
-				String s = text1_1.getText();
+		        String s = Window_2.display2.getText();
 				if(s.equals(""))
 				{
 					return;
@@ -134,81 +130,48 @@ public class Window_1 extends JFrame
 				display1_1.setText("");
 			}
 		});
-		clear.setBounds(270, 21, 89, 23);
+		clear.setBounds(617, 21, 89, 23);
 		contentPane.add(clear);
 		
 	}
 
 	public static void sendText() throws Exception
 	{
-        String s = Window_2.text2.getText();
+        String s = Window_2.display2.getText();
         if(s.equals("")) 
 		{
 			return;
 		}
-        String encMsg = encrypt(s, savedKey(), genCipher());
-        //String decMsg = decrypt(encMsg, cipherWin2);
-		display1.append(Window_2.username2 + " : " + encMsg + "\n");
-		//This is just printing the plain text and not decrypting...
-		//display1_1.append(Window_2.username2 + " : " + s + "\n");
+        try {
+        	Server input = new Server();
+        	input.encryptedMsg2(s);
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }
 
 	}
 	
 	public static void decText() throws Exception
 	{
-        String s = Window_1.text1_1.getText();
+        String s = Window_2.display2.getText();
         if(s.equals("")) 
 		{
 			return;
 		}
-        else {
-        String decMsg = decrypt(s, Window_2.getCipher());
-        display1_1.append(Window_2.username2 + " : " + decMsg + "\n");
+        try {
+        	Server output = new Server();
+        	output.decryptedMsg2(s);
+        } catch (Exception e) {
+        	e.printStackTrace();
         }
-	}
-	
-	public static Cipher genCipher() throws Exception {
-		cipher = Cipher.getInstance("AES");
-		return cipher;
-	}
-	
-	public static SecretKey savedKey() throws Exception {
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(128); // block size is 128bits
-        SecretKey secretKey = keyGenerator.generateKey();
-		return secretKey;
-		
-	}
-	
-	public static String encrypt(String s, SecretKey secretKey , Cipher cipher) 
-			throws Exception{
-		  byte[] plainTextByte = s.getBytes();
-	      cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-	      byte[] encryptedByte = cipher.doFinal(plainTextByte);
-	      Base64.Encoder encoder = Base64.getEncoder();
-	      String encryptedText = encoder.encodeToString(encryptedByte);
-	      return encryptedText;
-	    }
-	
-	public static String decrypt(String encryptedText, Cipher cipher)
-        throws Exception {
-	Base64.Decoder decoder = Base64.getDecoder();
-    byte[] encryptedTextByte = decoder.decode(encryptedText);
-    cipher.init(Cipher.DECRYPT_MODE, (Key) cipher);
-    byte[] decryptedByte = cipher.doFinal(encryptedTextByte);
-    String decryptedText = new String(decryptedByte);
-    return decryptedText;
-	}
-	
-	public static Cipher getCipher() throws Exception {
-		return cipher;
+
 	}
 	
 	private javax.swing.JLabel label1;
-	private static javax.swing.JTextArea display1;
+	static javax.swing.JTextArea display1;
 	private javax.swing.JButton send1;
 	public static javax.swing.JTextArea text1;
-	private static javax.swing.JTextArea display1_1;
+	static javax.swing.JTextArea display1_1;
 	public static javax.swing.JTextArea text1_1;
 	//private javax.swing.JLabel label1_1;
 	private javax.swing.JButton send1_1;
