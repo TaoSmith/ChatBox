@@ -2,20 +2,11 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.swing.JButton;
@@ -30,12 +21,12 @@ public class Window_1 extends JFrame
 	static String username1;
 	private JPanel contentPane;
 	static Cipher cipher;
-	
+	//static Cipher cipherWin2 = Window_2.getCipher();
 	/**
 	 * Launch the application.
 	 * @throws NoSuchAlgorithmException 
-	 */	
-	public static void main(String[] args)  
+	 */		
+	public static void main(String[] args) 
 	{
 		EventQueue.invokeLater(new Runnable() 
 		{
@@ -51,7 +42,7 @@ public class Window_1 extends JFrame
 					e.printStackTrace();
 				}
 			}
-				
+			
 		});
 	}
 	
@@ -79,6 +70,10 @@ public class Window_1 extends JFrame
 		text1.setBounds(21, 403, 239, 45);
 		contentPane.add(text1);
 		
+		text1_1 = new JTextArea();
+		text1_1.setBounds(370, 403, 239, 45);
+		contentPane.add(text1_1);
+		
 		send1 = new JButton("SEND");
 		send1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0_) {
@@ -98,27 +93,38 @@ public class Window_1 extends JFrame
 				text1.setText("");
 			}
 		});
-		
 		send1.setBounds(270, 403, 89, 45);
 		contentPane.add(send1);
+	
 		////////////////Decrypt button///////////////////////
 		send1_1	= new JButton("DECRYPT");
 		send1_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0_) {
-				String s = text1.getText();
-				if(s.equals(" "));
+				String s = text1_1.getText();
+				if(s.equals(""))
 				{
 					return;
 				}
+				try {
+					Window_2.decText();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				text1_1.setText("");
 			}
 		});
-		send1_1.setBounds(500, 403, 89, 45);
+		send1_1.setBounds(617, 403, 89, 45);
 		contentPane.add(send1_1);
 		////////////////////////////////////////////////////
-		
+	
 		label1 = new JLabel("Chat window for : " + username1);
 		label1.setBounds(21, 25, 250, 14);
 		contentPane.add(label1);
+		
+		//label1_1 = new JLabel("DECRYPTED MESSAGE");
+		//label1_1.setBounds(476, 420, 250, 14);
+		//contentPane.add(label1_1);
 		
 		JButton clear = new JButton("CLEAR");
 		clear.addActionListener(new ActionListener() {
@@ -133,57 +139,78 @@ public class Window_1 extends JFrame
 		
 	}
 
-	
 	public static void sendText() throws Exception
 	{
-		//////////////////////key gen ////////////////////////////////////
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(128); // block size is 128bits
-        SecretKey secretKey = keyGenerator.generateKey();
-        cipher = Cipher.getInstance("AES");
-		/////////////////////////////////////////////////////////////////////
-        
-		String s = Window_2.text2.getText();
-		
-		//////////////////////for encryption////////////////////////////////
-		byte[] plainTextByte = s.getBytes();
-        try {
-			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        byte[] encryptedByte = null;
-		try {
-			encryptedByte = cipher.doFinal(plainTextByte);
-		} catch (IllegalBlockSizeException | BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        Base64.Encoder encoder = Base64.getEncoder();
-        String encryptedText = encoder.encodeToString(encryptedByte);
-		///////////////////////////////////////////////////////////////////
-		
+        String s = Window_2.text2.getText();
         if(s.equals("")) 
 		{
 			return;
 		}
-		//Saves what the is being typed in Window 1 and appends it to savedmsg.txt.
-		//File fileName = new File("savedmsg.txt");
-		//FileWriter fileWriter = new FileWriter(fileName, true);
-		//BufferedWriter buffer = new BufferedWriter(fileWriter);
-		//PrintWriter printWriter = new PrintWriter(buffer);
-		display1.append(Window_2.username2 + " : " + encryptedText + "\n");
-		display1_1.append(Window_2.username2 +  " : " + s + "\n");
-		//printWriter.println(Window_2.username2+ " : "  + s);
-		//printWriter.close();
-	}
+        String encMsg = encrypt(s, savedKey(), genCipher());
+        //String decMsg = decrypt(encMsg, cipherWin2);
+		display1.append(Window_2.username2 + " : " + encMsg + "\n");
+		//This is just printing the plain text and not decrypting...
+		//display1_1.append(Window_2.username2 + " : " + s + "\n");
 
+	}
+	
+	public static void decText() throws Exception
+	{
+        String s = Window_1.text1_1.getText();
+        if(s.equals("")) 
+		{
+			return;
+		}
+        else {
+        String decMsg = decrypt(s, Window_2.getCipher());
+        display1_1.append(Window_2.username2 + " : " + decMsg + "\n");
+        }
+	}
+	
+	public static Cipher genCipher() throws Exception {
+		cipher = Cipher.getInstance("AES");
+		return cipher;
+	}
+	
+	public static SecretKey savedKey() throws Exception {
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(128); // block size is 128bits
+        SecretKey secretKey = keyGenerator.generateKey();
+		return secretKey;
+		
+	}
+	
+	public static String encrypt(String s, SecretKey secretKey , Cipher cipher) 
+			throws Exception{
+		  byte[] plainTextByte = s.getBytes();
+	      cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+	      byte[] encryptedByte = cipher.doFinal(plainTextByte);
+	      Base64.Encoder encoder = Base64.getEncoder();
+	      String encryptedText = encoder.encodeToString(encryptedByte);
+	      return encryptedText;
+	    }
+	
+	public static String decrypt(String encryptedText, Cipher cipher)
+        throws Exception {
+	Base64.Decoder decoder = Base64.getDecoder();
+    byte[] encryptedTextByte = decoder.decode(encryptedText);
+    cipher.init(Cipher.DECRYPT_MODE, (Key) cipher);
+    byte[] decryptedByte = cipher.doFinal(encryptedTextByte);
+    String decryptedText = new String(decryptedByte);
+    return decryptedText;
+	}
+	
+	public static Cipher getCipher() throws Exception {
+		return cipher;
+	}
 	
 	private javax.swing.JLabel label1;
 	private static javax.swing.JTextArea display1;
 	private javax.swing.JButton send1;
 	public static javax.swing.JTextArea text1;
 	private static javax.swing.JTextArea display1_1;
+	public static javax.swing.JTextArea text1_1;
+	//private javax.swing.JLabel label1_1;
 	private javax.swing.JButton send1_1;
+
 }
