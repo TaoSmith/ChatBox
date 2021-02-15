@@ -119,6 +119,7 @@ public class Server extends JFrame {
 		Window_2.display2.append(Window_1.username1 + " : " + enc + "\n");
 		return enc;
 	}
+	//\\******//Something isn't working here? Need to figure out how to get a global variable of key to use//******//\\
 	public String decryptedMsg1(String encrypteddMsg1) throws Exception{
 		String enc = Server.encrypt(encrypteddMsg1, savedKey());
 		String dec = Server.decrypt(enc, savedKey());
@@ -130,6 +131,7 @@ public class Server extends JFrame {
 		Window_1.display1.append(Window_2.username2 + " : " + enc + "\n");
 		return enc;
 	}
+	//\\******//Something isn't working here? Need to figure out how to get a global variable of key to use//******//\\
 	public String decryptedMsg2(String encrypteddMsg1) throws Exception{
 		String enc = Server.encrypt(encrypteddMsg1, savedKey());
 		String dec = Server.decrypt(enc, savedKey());
@@ -167,6 +169,7 @@ public class Server extends JFrame {
     byte[] encryptedTextByte = decoder.decode(encryptedText);
 	Cipher cipher = Cipher.getInstance("AES");
     cipher.init(Cipher.DECRYPT_MODE, secretKey);
+    //\\******//The cipher.update will grab something and display garble. compared to doFinal//******//\\
     byte[] decryptedByte = cipher.update(encryptedTextByte);
     String decryptedText = new String(decryptedByte);
     return decryptedText;
