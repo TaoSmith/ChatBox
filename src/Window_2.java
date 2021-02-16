@@ -22,7 +22,6 @@ public class Window_2 extends JFrame
 	private JPanel contentPane;
 	static Cipher cipher;
 	//static Cipher cipherWin1 = Window_1.getCipher();
-
 	/**
 	 * Launch the application.
 	 * @throws NoSuchAlgorithmException 
@@ -68,12 +67,8 @@ public class Window_2 extends JFrame
 		contentPane.add(display2_2);
 		
 		text2 = new JTextArea();
-		text2.setBounds(21, 403, 239, 45);
+		text2.setBounds(21, 403, 495, 45);
 		contentPane.add(text2);
-		
-		text2_2 = new JTextArea();
-		text2_2.setBounds(370, 403, 239, 45);
-		contentPane.add(text2_2);
 		
 		send2 = new JButton("SEND");
 		send2.addActionListener(new ActionListener() {
@@ -94,14 +89,14 @@ public class Window_2 extends JFrame
 				text2.setText("");
 			}
 		});
-		send2.setBounds(270, 403, 89, 45);
+		send2.setBounds(523, 403, 89, 45);
 		contentPane.add(send2);
 		
 		////////////////Decrypt button///////////////////////
 		send2_2	= new JButton("DECRYPT");
 		send2_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0_) {
-				String s = text2_2.getText();
+				String s = Window_1.display1.getText();
 				if(s.equals(""))
 				{
 					return;
@@ -135,7 +130,7 @@ public class Window_2 extends JFrame
 				display2_2.setText("");
 			}
 		});
-		clear.setBounds(270, 21, 89, 23);
+		clear.setBounds(617, 21, 89, 23);
 		contentPane.add(clear);
 		
 	}
@@ -147,70 +142,35 @@ public class Window_2 extends JFrame
 		{
 			return;
 		}
-		String encMsg = encrypt(s, savedKey(), genCipher());
-        //String decMsg = decrypt(encMsg, cipherWin1);
-		display2.append(Window_1.username1 + " : " + encMsg + "\n");
-		//This is just printing the plain text and not decrypting...
-		//display2_2.append(Window_1.username1 + " : " + s + "\n");
+        try {
+        	Server input = new Server();
+        	input.encryptedMsg1(s);
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }
 
 	}
 	
 	public static void decText() throws Exception
 	{
-		String s = Window_2.text2_2.getText();
+		String s = Window_1.display1.getText();
 		if(s.equals("")) 
 		{
 			return;
 		}
-		else {
-        String decMsg = decrypt(s, Window_1.getCipher());
-		display2_2.append(Window_1.username1 + " : " + decMsg + "\n");
-		}
+		try {
+        	Server output = new Server();
+        	output.decryptedMsg1(s);
+        } catch (Exception e) {
+        	e.printStackTrace();
+        }
+
 	}
-	
-	
-	public static Cipher genCipher() throws Exception {
-		cipher = Cipher.getInstance("AES");
-		return cipher;
-	}
-	
-	public static SecretKey savedKey() throws Exception {
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(128); // block size is 128bits
-        SecretKey secretKey = keyGenerator.generateKey();
-		return secretKey;
-		
-	}
-	
-	public static String encrypt(String s, SecretKey secretKey, Cipher cipher) 
-			throws Exception{
-		  byte[] plainTextByte = s.getBytes();
-	      cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-	      byte[] encryptedByte = cipher.doFinal(plainTextByte);
-	      Base64.Encoder encoder = Base64.getEncoder();
-	      String encryptedText = encoder.encodeToString(encryptedByte);
-	      return encryptedText;
-	    }
-	
-	public static String decrypt(String encryptedText, Cipher cipher)
-        throws Exception {
-	Base64.Decoder decoder = Base64.getDecoder();
-    byte[] encryptedTextByte = decoder.decode(encryptedText);
-    cipher.init(Cipher.DECRYPT_MODE, (Key) cipher);
-    byte[] decryptedByte = cipher.doFinal(encryptedTextByte);
-    String decryptedText = new String(decryptedByte);
-    return decryptedText;
-	}
-	
-	public static Cipher getCipher() throws Exception {
-		return cipher;
-	}
-	
 	private javax.swing.JLabel label2;
-	private static javax.swing.JTextArea display2;
+	static javax.swing.JTextArea display2;
 	private javax.swing.JButton send2;
 	public static javax.swing.JTextArea text2;
-	public static javax.swing.JTextArea display2_2;
+	static javax.swing.JTextArea display2_2;
 	public static javax.swing.JTextArea text2_2;
 	//private javax.swing.JLabel label2_2;
 	private javax.swing.JButton send2_2;
