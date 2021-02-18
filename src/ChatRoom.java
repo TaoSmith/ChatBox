@@ -19,7 +19,7 @@ public class ChatRoom {
 		win1 = new Window_1();
 		win2 = new Window_2();
 		win1.setLocation(500, 200);
-		win2.setLocation(900, 200);
+		win2.setLocation(1250, 200);
 		win1.setVisible(true);
 		win2.setVisible(true);
 		server.setVisible(false);

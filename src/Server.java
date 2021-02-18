@@ -2,12 +2,19 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,7 +28,8 @@ public class Server extends JFrame {
 	private JPanel contentPane;
 	private JTextField name1;
 	private JTextField name2;
-
+	
+	//static Cipher cipher = null;
 	/**
 	 * Launch the application.
 	 */
@@ -44,6 +52,7 @@ public class Server extends JFrame {
 		});
 	}
 	
+
 	/**
 	 * Create the frame.
 	 */
@@ -113,65 +122,63 @@ public class Server extends JFrame {
 		ChatRoom.createRoom();
 		
 	}
-	//Calling for encryption
-	public String encryptedMsg1(String inputedMsg) throws Exception{
-		String enc = Server.encrypt(inputedMsg, savedKey());
-		Window_2.display2.append(Window_1.username1 + " : " + enc + "\n");
-		return enc;
-	}
-	//\\******//Something isn't working here? Need to figure out how to get a global variable of key to use//******//\\
-	public String decryptedMsg1(String encrypteddMsg1) throws Exception{
-		String enc = Server.encrypt(encrypteddMsg1, savedKey());
-		String dec = Server.decrypt(enc, savedKey());
-		Window_1.display1_1.append(Window_2.username2 + " : " + dec + "\n");
-		return dec;
-	}
-	public String encryptedMsg2(String inputedMsg) throws Exception{
-		String enc = Server.encrypt(inputedMsg, savedKey());
-		Window_1.display1.append(Window_2.username2 + " : " + enc + "\n");
-		return enc;
-	}
-	//\\******//Something isn't working here? Need to figure out how to get a global variable of key to use//******//\\
-	public String decryptedMsg2(String encrypteddMsg1) throws Exception{
-		String enc = Server.encrypt(encrypteddMsg1, savedKey());
-		String dec = Server.decrypt(enc, savedKey());
-		Window_2.display2_2.append(Window_1.username1 + " : " + dec + "\n");
-		return dec;
-	}
-	//Cipher Style
-	//public static Cipher genCipher() throws Exception {
-	//	Cipher cipher = Cipher.getInstance("AES");
-	//	return cipher;
-	//}
-	//Secret Key Generator
-	public static SecretKey savedKey() throws Exception {
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(128); // block size is 128bits
-        SecretKey secretKey = keyGenerator.generateKey();
-		return secretKey;
-		
-	}
-	//Encryption Algorithm
-	public static String encrypt(String s, SecretKey secretKey) 
-			throws Exception{
-		  byte[] plainTextByte = s.getBytes();
-		  Cipher cipher = Cipher.getInstance("AES");
-	      cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-	      byte[] encryptedByte = cipher.doFinal(plainTextByte);
-	      Base64.Encoder encoder = Base64.getEncoder();
-	      String encryptedText = encoder.encodeToString(encryptedByte);
-	      return encryptedText;
-	    }
-	//Decryption Algorithm
-	public static String decrypt(String encryptedText, SecretKey secretKey)
-        throws Exception {
-	Base64.Decoder decoder = Base64.getDecoder();
-    byte[] encryptedTextByte = decoder.decode(encryptedText);
-	Cipher cipher = Cipher.getInstance("AES");
-    cipher.init(Cipher.DECRYPT_MODE, secretKey);
-    //\\******//The cipher.update will grab something and display garble. compared to doFinal//******//\\
-    byte[] decryptedByte = cipher.update(encryptedTextByte);
-    String decryptedText = new String(decryptedByte);
-    return decryptedText;
-	}
+
+	 
+    private static SecretKeySpec secretKey;
+    private static byte[] key;
+ 
+    public static void setKey(String myKey) 
+    {
+        MessageDigest sha = null;
+        try {
+            key = myKey.getBytes("UTF-8");
+            sha = MessageDigest.getInstance("SHA-1");
+            key = sha.digest(key);
+            key = Arrays.copyOf(key, 16); 
+            secretKey = new SecretKeySpec(key, "AES");
+        } 
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } 
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+ 
+    public static String encrypt(String strToEncrypt, String secret) 
+    {
+        try
+        {
+            setKey(secret);
+            byte[] iv = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0 };
+	        IvParameterSpec ivspec = new IvParameterSpec(iv);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
+            return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
+        } 
+        catch (Exception e) 
+        {
+            System.out.println("Error while encrypting: " + e.toString());
+        }
+        return null;
+    }
+ 
+    public static String decrypt(String strToDecrypt, String secret) 
+    {
+        try
+        {
+            setKey(secret);
+            byte[] iv = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0, 0, 0, 0, 0 };
+	        IvParameterSpec ivspec = new IvParameterSpec(iv);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
+            return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
+        } 
+        catch (Exception e) 
+        {
+            System.out.println("Error while decrypting: " + e.toString());
+        }
+        return null;
+    }
+	
 }
